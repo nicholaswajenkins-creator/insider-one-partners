@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insider One — Partner Target Universe</title>
+<style>
+  :root {
+    --bg: #18181b;
+    --surface: #1f1f23;
+    --surface2: #27272c;
+    --border: #35353d;
+    --accent: #ff4c24;
+    --text: #f0f0f2;
+    --muted: #9b9ba8;
+    --tier1: #ff4c24;
+    --tier2: #ff914d;
+    --tier3: #ffb347;
+    --tier4: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; line-height: 1.5; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px 28px 16px; position: sticky; top: 0; z-index: 100; }
+  .header-top { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; color: #fff; }
+  h1 span { color: var(--accent); }
+  .meta { color: var(--muted); font-size: 12px; }
+  .filters { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+  .filter-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 3px; }
+  .filter-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); font-size: 12px; padding: 4px 11px; border-radius: 20px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  main { padding: 20px 28px 48px; max-width: 1400px; }
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin: 28px 0 10px; display: flex; align-items: center; gap: 10px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 10px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 14px 14px 14px 17px; transition: border-color 0.15s, transform 0.1s; position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; border-radius: 9px 0 0 9px; }
+  .card.tier-1::before { background: var(--tier1); }
+  .card.tier-2::before { background: var(--tier2); }
+  .card.tier-3::before { background: var(--tier3); }
+  .card.tier-4::before { background: var(--tier4); }
+  .card.existing { border-style: dashed; opacity: 0.7; }
+  .card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; gap: 8px; }
+  .card-name { font-size: 13.5px; font-weight: 700; color: #fff; line-height: 1.3; }
+  .star { color: #ffb347; font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+  .badges { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+  .badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+  .badge-tier1 { background: rgba(255,76,36,0.18); color: #ff7a57; border: 1px solid rgba(255,76,36,0.35); }
+  .badge-tier2 { background: rgba(255,145,77,0.15); color: #ffb080; border: 1px solid rgba(255,145,77,0.35); }
+  .badge-tier3 { background: rgba(255,179,71,0.15); color: #ffd080; border: 1px solid rgba(255,179,71,0.35); }
+  .badge-tier4 { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.25); }
+  .badge-existing { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+  .badge-tech { background: rgba(99,179,237,0.12); color: #93c5fd; border: 1px solid rgba(99,179,237,0.25); }
+  .badge-solution { background: rgba(255,76,36,0.1); color: #ff9f85; border: 1px solid rgba(255,76,36,0.2); }
+  .card-cat { font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+  .card-desc { font-size: 12.5px; color: #a0a0ad; line-height: 1.55; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; margin: 0 0 8px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 10px 16px; text-align: center; min-width: 80px; }
+  .stat-num { font-size: 20px; font-weight: 800; line-height: 1.1; color: #fff; }
+  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .hidden { display: none !important; }
+  .search-wrap { position: relative; margin-left: auto; }
+  #search { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-size: 12px; padding: 5px 11px 5px 28px; border-radius: 6px; width: 170px; outline: none; transition: border-color 0.15s; }
+  #search:focus { border-color: var(--accent); }
+  .search-icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; }
+  .no-results { text-align: center; padding: 48px; color: var(--muted); font-size: 13px; }
+  @media (max-width: 600px) { header { padding: 14px; } main { padding: 14px; } .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <h1>Insider One — <span>Partner Target Universe</span></h1>
+      <div class="meta">Compiled by Nick Jenkins &nbsp;·&nbsp; Tech &amp; Solution Partner Strategy &nbsp;·&nbsp; June 2026 &nbsp;·&nbsp; <span style="color:#ffb347">★ = Senior-level contacts &amp; warm intros &nbsp;·&nbsp; ~70% of companies listed</span></div>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input id="search" type="text" placeholder="Search partners…">
+    </div>
+  </div>
+  <div class="filters">
+    <span class="filter-label">Type:</span>
+    <button class="filter-btn active" data-cat="All">All</button>
+    <button class="filter-btn" data-cat="tech">Tech Partners</button>
+    <button class="filter-btn" data-cat="solution">Solution Partners</button>
+    <span class="filter-label" style="margin-left:6px">Tier:</span>
+    <button class="filter-btn active" data-tier="all">All Tiers</button>
+    <button class="filter-btn" data-tier="1">Tier 1</button>
+    <button class="filter-btn" data-tier="2">Tier 2</button>
+    <button class="filter-btn" data-tier="3">Tier 3</button>
+    <button class="filter-btn" data-cat="existing">Existing</button>
+  </div>
+</header>
+
+<main>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="s-total">0</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-box"><div class="stat-num" id="s-new">0</div><div class="stat-lbl">New Targets</div></div>
+    <div class="stat-box"><div class="stat-num" id="s-t1">0</div><div class="stat-lbl">Tier 1</div></div>
+    <div class="stat-box"><div class="stat-num" id="s-t2">0</div><div class="stat-lbl">Tier 2</div></div>
+    <div class="stat-box"><div class="stat-num" id="s-t3">0</div><div class="stat-lbl">Tier 3</div></div>
+    <div class="stat-box"><div class="stat-num" id="s-ex">0</div><div class="stat-lbl">Existing</div></div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tier1)"></div>Tier 1 — Immediate priority</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tier2)"></div>Tier 2 — Strong fit, pursue within 90 days</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tier3)"></div>Tier 3 — Valuable in specific verticals or regions</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tier4);border:1px dashed #555"></div>Existing — Already on Insider One's partner list</div>
+    <div class="legend-item"><span style="color:#ffb347">★</span>Senior-level contact / warm intro</div>
+  </div>
+  <div id="cards-container"></div>
+  <div class="no-results hidden" id="no-results">No partners match your filters.</div>
+</main>
+
+<script>
+const partners = [
+
+  // ── DATA INFRASTRUCTURE ────────────────────────────────
+  { name:"Snowflake", cat:"tech", category:"Data Infrastructure / Cloud Warehouse", tier:1, existing:false, nick:true,
+    desc:"The dominant cloud data warehouse. Insider One's CDP and personalisation layer is a natural downstream consumer of Snowflake data. A Data Share integration unlocks zero-copy data activation." },
+  { name:"Google Cloud / BigQuery", cat:"tech", category:"Data Infrastructure / Cloud", tier:1, existing:false, nick:true,
+    desc:"GCP's analytics and ML infrastructure underpins many enterprise MarTech stacks. A BigQuery connector + Vertex AI integration would close deals with GCP-native clients." },
+  { name:"Microsoft Azure / Fabric", cat:"tech", category:"Data Infrastructure / Cloud", tier:1, existing:false, nick:true,
+    desc:"Azure Data Factory, Synapse, and Fabric are central to enterprise data strategy in EMEA. Integration opens doors in financial services and retail — both core Insider One verticals." },
+  { name:"Databricks", cat:"tech", category:"Data Infrastructure / ML", tier:2, existing:false, nick:true,
+    desc:"Fast-growing lakehouse platform displacing Hadoop in enterprise accounts. Its Unity Catalog serves as a first-party data source for Insider One segmentation." },
+
+  // ── CDP & DATA PIPELINE ───────────────────────────────
+  { name:"Segment (Twilio)", cat:"tech", category:"CDP / Data Pipeline", tier:1, existing:false, nick:true,
+    desc:"The default CDP for mid-market to enterprise digital-native brands. A bidirectional integration makes Insider One a destination for Segment audiences — critical for the '$0 migration' story." },
+  { name:"Tealium", cat:"tech", category:"CDP / Tag Management", tier:2, existing:false, nick:false,
+    desc:"Enterprise-grade tag management and CDP with strong EMEA presence in retail, finance, and travel — exactly Insider One's target verticals." },
+  { name:"Fivetran", cat:"tech", category:"Data Integration / ETL", tier:2, existing:false, nick:false,
+    desc:"Leading ELT connector platform used in virtually every modern data stack. A native Fivetran connector accelerates onboarding for data-warehouse-first clients." },
+  { name:"mParticle", cat:"tech", category:"CDP / Data Pipeline", tier:0, existing:true, nick:true,
+    desc:"Customer data infrastructure platform. Existing partner — room to deepen the engagement." },
+
+  // ── ECOMMERCE PLATFORMS ───────────────────────────────
+  { name:"Shopify Plus", cat:"tech", category:"Ecommerce Platform", tier:1, existing:false, nick:true,
+    desc:"The dominant mid-market to enterprise DTC platform globally. A Shopify Plus app and certified integration unlocks a massive inbound channel via the Shopify App Store." },
+  { name:"Salesforce Commerce Cloud (SFCC)", cat:"tech", category:"Ecommerce Platform", tier:1, existing:false, nick:true,
+    desc:"Core to large fashion, retail, and luxury brands. An SFCC integration deepens Insider One's enterprise credibility and connects with SI partners who implement it." },
+  { name:"Magento / Adobe Commerce", cat:"tech", category:"Ecommerce Platform", tier:2, existing:false, nick:true,
+    desc:"Platform of choice for complex B2C/B2B catalogue retailers in EMEA. Adobe Commerce Cloud customers are enterprise buyers who need full-stack personalisation." },
+  { name:"WooCommerce", cat:"tech", category:"Ecommerce Platform", tier:2, existing:false, nick:true,
+    desc:"The most widely used open-source ecommerce platform globally, built on WordPress. Huge SMB and mid-market install base — a WooCommerce integration broadens Insider One's accessible market significantly." },
+  { name:"commercetools", cat:"tech", category:"Ecommerce Platform", tier:2, existing:false, nick:false,
+    desc:"The composable commerce standard for enterprise retail transformation projects. Deep partnership with MACH Alliance SI ecosystem creates strong co-sell motion." },
+  { name:"BigCommerce", cat:"tech", category:"Ecommerce Platform", tier:3, existing:false, nick:false,
+    desc:"Growing enterprise alternative to Shopify, especially in manufacturing and B2B. Strong in ANZ and North America." },
+  { name:"Wix", cat:"tech", category:"Ecommerce Platform", tier:3, existing:false, nick:true,
+    desc:"Fast-growing website and ecommerce platform with a large SMB customer base. Integration extends Insider One's reach into the long tail of online retail." },
+  { name:"VTEX", cat:"tech", category:"Ecommerce Platform", tier:0, existing:true, nick:false,
+    desc:"Ecommerce platform strong in LATAM. Existing partner." },
+
+  // ── CRM & MARKETING AUTOMATION ────────────────────────
+  { name:"Salesforce Marketing Cloud", cat:"tech", category:"CRM / Marketing Automation", tier:1, existing:false, nick:true,
+    desc:"Many Insider One prospects have SFMC contracts they're looking to supplement or replace. A complementary integration story — or a displacement play — is essential." },
+  { name:"Microsoft Dynamics 365", cat:"tech", category:"CRM / Marketing Automation", tier:2, existing:false, nick:false,
+    desc:"Preferred CRM in financial services, automotive, and public sector — all Insider One verticals. Azure alignment makes this a natural co-sell with Microsoft." },
+
+  // ── CRM / CUSTOMER SERVICE ────────────────────────────
+  { name:"Salesforce (CRM)", cat:"tech", category:"CRM / Customer Service", tier:1, existing:false, nick:true,
+    desc:"Salesforce CRM is the system of record for a large proportion of Insider One's enterprise prospects. Bidirectional sync between Salesforce contact data and Insider One's CDP is critical for enterprise deals." },
+  { name:"HubSpot", cat:"tech", category:"CRM / Customer Service", tier:2, existing:false, nick:false,
+    desc:"Dominant CRM in the SMB-to-mid-market segment. Many Insider One customers use HubSpot as their contact database — a native integration for profile sync and journey triggers is table stakes." },
+  { name:"Zoho CRM", cat:"tech", category:"CRM / Customer Service", tier:2, existing:false, nick:false,
+    desc:"Fast-growing CRM platform with strong uptake in EMEA mid-market, particularly in manufacturing, retail, and financial services. Integration enables journey triggers from CRM lifecycle events." },
+  { name:"Zendesk", cat:"tech", category:"CRM / Customer Service", tier:2, existing:false, nick:false,
+    desc:"The dominant mid-market customer support platform. Bidirectional sync: Insider One segment data enriches support tickets; Zendesk CSAT history enriches Insider One profiles." },
+  { name:"Pipedrive", cat:"tech", category:"CRM / Customer Service", tier:3, existing:false, nick:false,
+    desc:"Popular sales-focused CRM widely used by SMB and scale-up teams. Contact and deal data from Pipedrive can trigger Insider One onboarding and re-engagement journeys." },
+
+  // ── IDENTITY & CONSENT ────────────────────────────────
+  { name:"OneTrust", cat:"tech", category:"Consent / Privacy Management", tier:1, existing:false, nick:true,
+    desc:"Market leader in consent management and data privacy. As third-party cookies disappear, consent-first data collection makes Insider One's CDP capability even more valuable. Joint GTM on first-party data." },
+  { name:"LiveRamp", cat:"tech", category:"Identity Resolution / Data Collaboration", tier:1, existing:false, nick:true,
+    desc:"The de facto standard for identity resolution and clean room data collaboration. An Insider One + LiveRamp integration unlocks addressable audience activation across paid and owned channels." },
+
+  // ── ANALYTICS ─────────────────────────────────────────
+  { name:"Google Analytics 4 / Looker", cat:"tech", category:"Analytics", tier:1, existing:false, nick:false,
+    desc:"GA4 is the default analytics layer for most of Insider One's customer base. Deep event-level integration — bidirectional data flow between GA4 and Insider One's CDP — is a must-have." },
+  { name:"Contentsquare", cat:"tech", category:"Digital Experience Analytics", tier:2, existing:false, nick:false,
+    desc:"Market leader in UX and experience analytics, deep in EMEA enterprise retail and finance. Behavioural signals from Contentsquare feed Insider One's personalisation engine — highly complementary." },
+  { name:"FullStory", cat:"tech", category:"Digital Experience Analytics", tier:2, existing:false, nick:false,
+    desc:"Session replay and DXI platform. Signals from FullStory (rage clicks, drop-off) can trigger Insider One journey interventions — strong co-sell story." },
+  { name:"Amplitude", cat:"tech", category:"Analytics", tier:0, existing:true, nick:false,
+    desc:"Product analytics integration. Existing partner — evaluate depth of integration and whether co-marketing is active." },
+  { name:"Mixpanel", cat:"tech", category:"Analytics", tier:0, existing:true, nick:false,
+    desc:"Product analytics integration. Existing partner." },
+
+  // ── LOYALTY ───────────────────────────────────────────
+  { name:"Loyalty Lion", cat:"tech", category:"Loyalty", tier:2, existing:false, nick:true,
+    desc:"UK-headquartered loyalty platform, strong in Shopify-native DTC. Complementary to Insider One's journey orchestration — loyalty events trigger personalised campaigns." },
+  { name:"Yotpo", cat:"tech", category:"Loyalty", tier:2, existing:false, nick:true,
+    desc:"Loyalty, reviews, SMS, and UGC platform popular with mid-market DTC brands. Deep Shopify integration. Strong co-sell with Insider One on combined personalisation + social proof." },
+  { name:"Talon.one", cat:"tech", category:"Loyalty", tier:0, existing:true, nick:false,
+    desc:"Promotion and loyalty engine. Existing tech partner." },
+  { name:"Antavo", cat:"tech", category:"Loyalty", tier:0, existing:true, nick:false,
+    desc:"Enterprise loyalty platform. Existing partner — evaluate tier upgrade given strong ICP alignment." },
+  { name:"Loyoly", cat:"tech", category:"Loyalty", tier:0, existing:true, nick:false,
+    desc:"Post-purchase engagement platform covering referrals, UGC, and reviews. Existing partner." },
+
+  // ── PAID MEDIA ACTIVATION ─────────────────────────────
+  { name:"Meta (Facebook / Instagram Ads)", cat:"tech", category:"Paid Media Activation", tier:1, existing:false, nick:true,
+    desc:"Insider One's CDP and audience segmentation should power Meta Custom Audiences and CAPI event matching. This is the most powerful paid-media activation motion available." },
+  { name:"Google Ads / DV360", cat:"tech", category:"Paid Media Activation", tier:1, existing:false, nick:false,
+    desc:"Customer Match and Display & Video 360 activation from Insider One's CDP audiences. Completes the paid + owned omnichannel story." },
+  { name:"TikTok for Business", cat:"tech", category:"Paid Media Activation", tier:2, existing:false, nick:true,
+    desc:"TikTok's Events API mirrors Meta's CAPI. Insider One's first-party CDP data as a TikTok signal source is compelling, especially for beauty, fashion, and retail." },
+  { name:"Snapchat (Snap)", cat:"tech", category:"Paid Media Activation", tier:2, existing:false, nick:true,
+    desc:"Snap's Conversions API and audience activation tools allow Insider One's CDP segments to power targeted campaigns — particularly strong for Gen Z retail and beauty audiences." },
+  { name:"Reddit Ads", cat:"tech", category:"Paid Media Activation", tier:2, existing:false, nick:true,
+    desc:"Reddit's community-based targeting is increasingly relevant for tech, gaming, finance, and niche retail. Insider One's CDP data can power Reddit Pixel and audience match for performance campaigns." },
+  { name:"Pinterest", cat:"tech", category:"Paid Media Activation", tier:3, existing:false, nick:true,
+    desc:"Pinterest's Conversions API mirrors Meta CAPI. Strong fit for beauty, home, and retail verticals." },
+
+  // ── PROGRAMMATIC / DSP ────────────────────────────────
+  { name:"Amazon DSP", cat:"tech", category:"Programmatic / DSP", tier:1, existing:false, nick:true,
+    desc:"Amazon's demand-side platform for programmatic display, video, and audio. Insider One's CDP audiences activated through Amazon DSP unlocks purchase-intent targeting at scale across Amazon's owned and third-party inventory." },
+  { name:"The Trade Desk", cat:"tech", category:"Programmatic / DSP", tier:2, existing:false, nick:true,
+    desc:"Leading independent DSP. Insider One audiences exported to TTD for programmatic activation closes the CDP-to-paid loop. UID2.0 first-party data alignment also relevant." },
+  { name:"Adform", cat:"tech", category:"Programmatic / DSP", tier:2, existing:false, nick:true,
+    desc:"Independent full-stack DSP and ad management platform with strong EMEA presence. Privacy-first architecture aligns well with Insider One's first-party data story." },
+  { name:"StackAdapt", cat:"tech", category:"Programmatic / DSP", tier:2, existing:false, nick:true,
+    desc:"Fast-growing self-serve programmatic platform popular with mid-market performance teams. Native, display, video, and CTV inventory — Insider One audiences as a seed for lookalike and retargeting." },
+
+  // ── SOCIAL CAMPAIGN & COMMUNITY MANAGEMENT ────────────
+  { name:"Sprinklr", cat:"tech", category:"Social Campaign & Community Management", tier:1, existing:false, nick:true,
+    desc:"Enterprise-grade unified CXM platform covering social publishing, paid, listening, and customer care. Integration with Insider One's journey orchestration creates a full owned + social engagement loop." },
+  { name:"Hootsuite", cat:"tech", category:"Social Campaign & Community Management", tier:2, existing:false, nick:true,
+    desc:"Market-leading social media management platform with a large enterprise customer base. Integration with Insider One's CDP enables audience-led social scheduling and campaign triggers." },
+  { name:"Sprout Social", cat:"tech", category:"Social Campaign & Community Management", tier:2, existing:false, nick:true,
+    desc:"Social media management and analytics platform popular with mid-to-large enterprises. Data from Sprout Social enriches Insider One's behavioural customer profiles." },
+  { name:"Smartly", cat:"tech", category:"Social Campaign & Community Management", tier:2, existing:false, nick:true,
+    desc:"Creative automation and paid social platform used by performance marketing teams. Insider One audience segments can power Smartly's ad targeting at scale." },
+  { name:"Buffer", cat:"tech", category:"Social Campaign & Community Management", tier:3, existing:false, nick:true,
+    desc:"Popular social scheduling tool, strong with SMB and scale-up brands. Lighter-weight integration opportunity for Insider One's mid-market motion." },
+
+  // ── AI ────────────────────────────────────────────────
+  { name:"Anthropic / Claude", cat:"tech", category:"AI / LLM", tier:2, existing:false, nick:true,
+    desc:"Claude's API integrated into Insider One's Sirius AI layer for content generation, journey logic, and conversational CX. Positions Insider One as model-agnostic AI-native." },
+  { name:"OpenAI", cat:"tech", category:"AI / LLM", tier:2, existing:false, nick:false,
+    desc:"GPT-4/GPT-5 API integration for email personalisation, content suggestions, and conversational CX within Insider One workflows." },
+
+  // ── CPaaS ─────────────────────────────────────────────
+  { name:"Bird (formerly MessageBird)", cat:"tech", category:"CPaaS", tier:2, existing:false, nick:true,
+    desc:"Communications platform covering SMS, WhatsApp, email, and voice APIs. Bird's infrastructure can extend Insider One's reach in markets where carrier-grade delivery is needed." },
+  { name:"Vonage (Ericsson)", cat:"tech", category:"CPaaS", tier:2, existing:false, nick:true,
+    desc:"Communications API platform with strong enterprise telco roots. Voice, SMS, and video APIs complement Insider One's omnichannel journey layer, particularly in financial services and telco." },
+  { name:"Infobip", cat:"tech", category:"CPaaS", tier:2, existing:false, nick:true,
+    desc:"Global CPaaS leader with strong EMEA and emerging market presence. Covers SMS, WhatsApp, RCS, and voice — directly aligned with Insider One's channel strategy." },
+  { name:"Gupshup", cat:"tech", category:"CPaaS", tier:0, existing:true, nick:true,
+    desc:"WhatsApp and conversational messaging API platform. Existing partner, strong in emerging markets." },
+
+  // ── PAYMENTS ──────────────────────────────────────────
+  { name:"Stripe", cat:"tech", category:"Payments", tier:2, existing:false, nick:true,
+    desc:"Checkout and purchase event signals from Stripe trigger post-purchase journeys in Insider One. Also enables LTV modelling in the CDP." },
+  { name:"Adyen", cat:"tech", category:"Payments", tier:2, existing:false, nick:false,
+    desc:"Enterprise payments platform, dominant in EMEA for large retailers and travel. Purchase signals and unified commerce data feed Insider One's customer profiles." },
+
+  // ── MOBILE ATTRIBUTION ────────────────────────────────
+  { name:"AppsFlyer", cat:"tech", category:"Mobile Attribution", tier:0, existing:true, nick:true,
+    desc:"Mobile attribution — strong in app-heavy verticals like retail and travel. Existing partner." },
+  { name:"Adjust", cat:"tech", category:"Mobile Attribution", tier:0, existing:true, nick:true,
+    desc:"Mobile attribution platform. Existing partner." },
+  { name:"Branch", cat:"tech", category:"Mobile Attribution", tier:0, existing:true, nick:true,
+    desc:"Deep linking and mobile attribution. Existing partner." },
+
+  // ── OTHER EXISTING TECH ───────────────────────────────
+  { name:"AWS", cat:"tech", category:"Cloud Infrastructure", tier:0, existing:true, nick:true,
+    desc:"Cloud infrastructure partner. Opportunity to upgrade to deeper co-sell motion through AWS Marketplace listing and ISV Accelerate programme." },
+  { name:"Cloudinary", cat:"tech", category:"Digital Asset Management", tier:0, existing:true, nick:false,
+    desc:"Image and video management platform. Existing partner." },
+
+  // ══════════════════════════════════════════════════════
+  // SOLUTION PARTNERS
+  // ══════════════════════════════════════════════════════
+
+  // ── GSIs & CONSULTANCY GROUPS ─────────────────────────
+  { name:"Accenture", cat:"solution", category:"GSIs & Consultancy Groups", tier:1, existing:false, nick:true,
+    desc:"The world's largest SI and a dominant force in MarTech implementation globally. Accenture Song runs personalisation and CX transformation programmes for enterprise brands across every vertical Insider One targets." },
+  { name:"Deloitte Digital", cat:"solution", category:"GSIs & Consultancy Groups", tier:1, existing:false, nick:true,
+    desc:"Top-tier GSI with a major MarTech and CX practice. Implements Salesforce, Adobe, and increasingly independent CDPs for enterprise clients across retail, financial services, and travel." },
+  { name:"PwC Digital Services", cat:"solution", category:"GSIs & Consultancy Groups", tier:1, existing:false, nick:true,
+    desc:"PwC's digital transformation practice has a strong EMEA presence in financial services and retail. Insider One's AI personalisation pitch aligns with PwC's AI consulting narrative." },
+  { name:"IBM iX / Consulting", cat:"solution", category:"GSIs & Consultancy Groups", tier:1, existing:false, nick:true,
+    desc:"IBM's consulting practice runs large CX and commerce transformation programmes in FSI and telco — two of Insider One's core verticals. Increasingly vendor-agnostic on MarTech stack selection." },
+  { name:"Capgemini", cat:"solution", category:"GSIs & Consultancy Groups", tier:1, existing:false, nick:true,
+    desc:"Major EMEA-focused SI with strong retail, automotive, and financial services practice. Capgemini Invent runs MarTech implementation and strategy projects at enterprise scale." },
+  { name:"SAP", cat:"solution", category:"GSIs & Consultancy Groups", tier:2, existing:false, nick:true,
+    desc:"SAP's professional services arm implements SAP Customer Experience for large enterprise clients. As the owner of Emarsys, SAP sits at the intersection of ERP and MarTech — a key referral and co-sell target." },
+  { name:"Infosys (BPM / Cobalt)", cat:"solution", category:"GSIs & Consultancy Groups", tier:2, existing:false, nick:true,
+    desc:"Infosys Cobalt is their cloud-native transformation brand. Active Salesforce and Adobe partner — Insider One can position as a complementary or alternative choice for brands seeking platform consolidation." },
+  { name:"Wipro", cat:"solution", category:"GSIs & Consultancy Groups", tier:2, existing:false, nick:true,
+    desc:"Major global SI with growing digital commerce and MarTech practice. Strong in UK, DACH, and APAC. Actively builds partnerships with mid-tier MarTech vendors." },
+  { name:"Cognizant", cat:"solution", category:"GSIs & Consultancy Groups", tier:2, existing:false, nick:true,
+    desc:"Large global SI with growing EMEA presence. Cognizant Netcentric is their MarTech arm, historically Adobe-focused but actively diversifying — well-timed for an Insider One conversation." },
+
+  // ── AGENCY PARTNERS ───────────────────────────────────
+  { name:"Dentsu (Merkle & Mercury)", cat:"solution", category:"Agency Partners", tier:1, existing:false, nick:true,
+    desc:"Dentsu's data and performance brands — Merkle (CRM, loyalty, data) and Mercury (media) — run large personalisation and customer engagement programmes globally. The gold standard for data-driven CRM agency work." },
+  { name:"Publicis (Epsilon)", cat:"solution", category:"Agency Partners", tier:1, existing:false, nick:true,
+    desc:"Publicis Groupe's data and identity platform Epsilon powers personalisation across the group's agencies. Publicis Sapient also runs major MarTech SI programmes. A formal Insider One partnership unlocks the full Publicis network." },
+  { name:"Omnicom (Acxiom)", cat:"solution", category:"Agency Partners", tier:1, existing:false, nick:true,
+    desc:"Omnicom's Acxiom acquisition brings data and identity capability that complements Insider One's CDP. OMG agencies (Hearts & Science, OMD, PHD) run media and CX programmes for major enterprise clients." },
+  { name:"WPP (Choreograph)", cat:"solution", category:"Agency Partners", tier:1, existing:false, nick:true,
+    desc:"WPP's data and technology platform Choreograph centralises first-party data strategy across GroupM, VML, Ogilvy, and VMLY&R. Insider One's CDP and journey layer is a natural fit for Choreograph-led activation mandates." },
+  { name:"DEPT®", cat:"solution", category:"Agency Partners", tier:1, existing:false, nick:true,
+    desc:"One of Europe's largest independent digital agencies, running data, personalisation, and MarTech implementation projects across EMEA. Aggressive in acquiring enterprise clients in Insider One's core verticals." },
+  { name:"Havas (CSA)", cat:"solution", category:"Agency Partners", tier:2, existing:false, nick:true,
+    desc:"Havas's data and CRM practice — CSA — runs customer strategy and MarTech selection for major EMEA brands in retail and luxury. A strong referral source for Insider One's enterprise pipeline." },
+  { name:"Jellyfish", cat:"solution", category:"Agency Partners", tier:2, existing:false, nick:true,
+    desc:"Fast-growing performance and digital marketing agency with strong Google and Meta relationships. Increasingly building MarTech advisory capability — a natural partner for Insider One's paid + owned activation story." },
+  { name:"Brain Labs", cat:"solution", category:"Agency Partners", tier:2, existing:false, nick:true,
+    desc:"Data-science-led performance marketing agency, strong in the UK. Analytical rigour makes them a compelling Insider One implementation and referral partner for mid-to-large retail and DTC brands." },
+  { name:"Zeta Global", cat:"solution", category:"Agency Partners", tier:2, existing:false, nick:true,
+    desc:"Marketing technology and services company combining a proprietary data cloud with agency services. Strong in financial services and insurance. Complementary to Insider One's platform-first approach in regulated verticals." }
+
+];
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+function tierLabel(t) {
+  if (t === 1) return '<span class="badge badge-tier1">Tier 1</span>';
+  if (t === 2) return '<span class="badge badge-tier2">Tier 2</span>';
+  if (t === 3) return '<span class="badge badge-tier3">Tier 3</span>';
+  return '<span class="badge badge-existing">Existing</span>';
+}
+
+function catBadge(c) {
+  return c === 'tech'
+    ? '<span class="badge badge-tech">Tech</span>'
+    : '<span class="badge badge-solution">Solution</span>';
+}
+
+function tierClass(t) {
+  if (t === 1) return 'tier-1';
+  if (t === 2) return 'tier-2';
+  if (t === 3) return 'tier-3';
+  return 'tier-4';
+}
+
+function groupByCategory(arr) {
+  return arr.reduce(function(acc, p) {
+    if (!acc[p.category]) acc[p.category] = [];
+    acc[p.category].push(p);
+    return acc;
+  }, {});
+}
+
+var activeCat  = 'All';
+var activeTier = 'all';
+var searchTerm = '';
+
+function render() {
+  var container = document.getElementById('cards-container');
+  container.innerHTML = '';
+
+  var filtered = partners.filter(function(p) {
+    var catMatch;
+    if (activeCat === 'All')       catMatch = true;
+    else if (activeCat === 'existing') catMatch = p.existing;
+    else if (activeCat === 'tech')     catMatch = (p.cat === 'tech' && !p.existing);
+    else if (activeCat === 'solution') catMatch = (p.cat === 'solution' && !p.existing);
+    else catMatch = true;
+
+    var tierMatch;
+    if      (activeTier === 'all') tierMatch = true;
+    else if (activeTier === '1')   tierMatch = (p.tier === 1);
+    else if (activeTier === '2')   tierMatch = (p.tier === 2);
+    else if (activeTier === '3')   tierMatch = (p.tier === 3);
+    else tierMatch = true;
+
+    var s = searchTerm.toLowerCase();
+    var searchMatch = !s || p.name.toLowerCase().indexOf(s) !== -1
+                         || p.category.toLowerCase().indexOf(s) !== -1
+                         || p.desc.toLowerCase().indexOf(s) !== -1;
+
+    return catMatch && tierMatch && searchMatch;
+  });
+
+  filtered.sort(function(a, b) {
+    var ta = a.existing ? 99 : a.tier;
+    var tb = b.existing ? 99 : b.tier;
+    if (ta !== tb) return ta - tb;
+    return a.name.localeCompare(b.name);
+  });
+
+  document.getElementById('s-total').textContent = filtered.length;
+  document.getElementById('s-new').textContent   = filtered.filter(function(p){ return !p.existing; }).length;
+  document.getElementById('s-t1').textContent    = filtered.filter(function(p){ return p.tier === 1; }).length;
+  document.getElementById('s-t2').textContent    = filtered.filter(function(p){ return p.tier === 2; }).length;
+  document.getElementById('s-t3').textContent    = filtered.filter(function(p){ return p.tier === 3; }).length;
+  document.getElementById('s-ex').textContent    = filtered.filter(function(p){ return p.existing; }).length;
+
+  if (filtered.length === 0) {
+    document.getElementById('no-results').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('no-results').classList.add('hidden');
+
+  var groups = groupByCategory(filtered);
+
+  Object.keys(groups).forEach(function(cat) {
+    var label = document.createElement('div');
+    label.className = 'section-label';
+    label.textContent = cat;
+    container.appendChild(label);
+
+    var grid = document.createElement('div');
+    grid.className = 'grid';
+
+    groups[cat].forEach(function(p) {
+      var card = document.createElement('div');
+      card.className = 'card ' + tierClass(p.tier) + (p.existing ? ' existing' : '');
+      card.innerHTML =
+        '<div class="card-head">' +
+          '<div class="card-name">' + p.name + '</div>' +
+          '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0">' +
+            (p.nick ? '<span class="star" title="Senior-level contact / warm intro">★</span>' : '') +
+            catBadge(p.cat) +
+            tierLabel(p.tier) +
+          '</div>' +
+        '</div>' +
+        '<div class="card-cat">' + p.category + '</div>' +
+        '<div class="card-desc">' + p.desc + '</div>';
+      grid.appendChild(card);
+    });
+
+    container.appendChild(grid);
+  });
+}
+
+document.querySelectorAll('[data-cat]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('[data-cat]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    activeCat = btn.getAttribute('data-cat');
+    render();
+  });
+});
+
+document.querySelectorAll('[data-tier]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('[data-tier]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    activeTier = btn.getAttribute('data-tier');
+    render();
+  });
+});
+
+document.getElementById('search').addEventListener('input', function(e) {
+  searchTerm = e.target.value;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
